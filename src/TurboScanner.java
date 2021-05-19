@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-class TurboScanner {
+class TurboScanner implements AutoCloseable{
     BufferedReader br;
 
     public TurboScanner(InputStream in) {
@@ -30,6 +30,7 @@ class TurboScanner {
     }
 
     public byte nextByte() throws IOException {
+        //Will break with non ascii characters, be aware
         return (byte) br.read();
     }
     public void close() throws IOException {
