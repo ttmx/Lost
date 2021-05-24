@@ -24,21 +24,25 @@ public class LostBuilder {
     private final byte[][] grid;
     private final List<WeightedSuccessor>[][] kateGraph;
     private final List<Edge> johnGraph;
+    private final byte[] johnStart;
+    private final byte[] kateStart;
     private final byte[] magicalCells;
     private final byte[] exit;
 
     @SuppressWarnings("unchecked")
     public LostBuilder(byte[][] grid, byte rows, byte columns, byte numMagicalCells) {
         this.grid = grid;
-        this.kateGraph = (List<WeightedSuccessor>[][]) new List[rows][columns];
         this.johnGraph = new LinkedList<>();
+        this.kateGraph = (List<WeightedSuccessor>[][]) new List[rows][columns];
+        this.johnStart = new byte[2];
+        this.kateStart = new byte[2];
         this.magicalCells = new byte[2 * numMagicalCells];
         this.exit = new byte[2];
     }
 
     public Lost build() {
         //TODO
-        return new Lost(kateGraph, johnGraph);
+        return new Lost(kateGraph, johnGraph,kateStart,johnStart,exit);
     }
 
     public void processCell(byte i, byte j) {
@@ -94,11 +98,13 @@ public class LostBuilder {
     }
 
     public void setJohnStart(byte i, byte j) {
-        //TODO
+        johnStart[0] = i;
+        johnStart[1] = j;
     }
 
     public void setKateStart(byte i, byte j) {
-        //TODO
+        kateStart[0] = i;
+        kateStart[1] = j;
     }
 
     private boolean kateCanMoveTo(byte cell) {
