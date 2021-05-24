@@ -1,9 +1,16 @@
-public class Lost {
-    public Lost(byte[][] grid, byte[] wheelLocs, int[] wheelTimes, byte[] positions){
+import java.util.List;
 
+public class Lost {
+
+    private final List<WeightedSuccessor>[][] kateGraph;
+    private final List<Edge> johnGraph;
+
+    public Lost(List<WeightedSuccessor>[][] kateGraph, List<Edge> johnGraph) {
+        this.kateGraph = kateGraph;
+        this.johnGraph = johnGraph;
     }
 
-    public int[] result() {
+    public String result() {
         return null;
     }
 }
