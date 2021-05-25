@@ -5,7 +5,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         try (TurboScanner in = new TurboScanner(System.in)) {
             byte N = (byte) in.nextInt();
-            for (byte testCase = 0; testCase < N; testCase++) {
+            for (byte testCase = 1; testCase <= N; testCase++) {
                 byte R = (byte) in.nextInt();
                 byte C = (byte) in.nextInt();
                 byte M = (byte) in.nextInt();
