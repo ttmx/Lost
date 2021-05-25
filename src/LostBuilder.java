@@ -85,8 +85,8 @@ public class LostBuilder {
                 break;
             default:
                 assert ((byte) '1' <= cell && cell <= (byte) '9');
-                magicalCells[cell - '1'] = i;
-                magicalCells[cell - '1' + 1] = j;
+                magicalCells[2 * (cell - '1')] = i;
+                magicalCells[2 * (cell - '1') + 1] = j;
                 grid[i][j] = G;
                 processCell(i, j);
                 break;
