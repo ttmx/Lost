@@ -19,7 +19,7 @@ public class Lost {
     }
 
     public String result() {
-        return calcJohn() + "\n" + perilousLocations3();
+        return calcJohn() + "\n" + perilousLocations2();
     }
 
     public String perilousLocations3() {
@@ -71,6 +71,9 @@ public class Lost {
     }
 
     public String perilousLocations2() {
+        if (Arrays.equals(kateStart, exit)) {
+            return "Kate 0";
+        }
         int kateLength = dijkstra();
         return (kateLength != Integer.MAX_VALUE) ? "Kate " + kateLength : "Kate Unreachable";
     }
@@ -192,6 +195,9 @@ public class Lost {
     }
 
     public String calcJohn() {
+        if (Arrays.equals(johnStart, exit)) {
+            return "John 0";
+        }
         int[][] length = new int[kateGraph.length][kateGraph[0].length];
         for (int[] ints : length)
             Arrays.fill(ints, Integer.MAX_VALUE);
