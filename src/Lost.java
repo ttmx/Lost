@@ -100,9 +100,6 @@ public class Lost {
             // remove the minimum distance node
             // from the priority queue
             WeightedSuccessor node = connected.poll();
-            if (node == null) {
-                return Integer.MAX_VALUE;
-            }
 
             // adding the node whose distance is
             // finalized
@@ -124,14 +121,16 @@ public class Lost {
                     if (newLength < length[v.i][v.j]) {
                         length[v.i][v.j] = newLength;
                         boolean nodeIsInQueue = length[v.i][v.j] < Integer.MAX_VALUE;
-
+                        if (nodeIsInQueue) {
+                            connected.remove(new WeightedSuccessor(v.i, v.j, 0));
+                        }
                         // Add the current node to the queue
                         connected.add(new WeightedSuccessor(v.i, v.j, length[v.i][v.j]));
 
                     }
                 }
             }
-        } while (kateVertices != processed);
+        } while (!connected.isEmpty());
         return length[exit[0]][exit[1]];
     }
 
