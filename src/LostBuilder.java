@@ -28,6 +28,7 @@ public class LostBuilder {
     private final byte[] kateStart;
     private final byte[] magicalCells;
     private final byte[] exit;
+    private short kateVertices;
 
     @SuppressWarnings("unchecked")
     public LostBuilder(byte[][] grid, byte rows, byte columns, byte numMagicalCells) {
@@ -38,28 +39,34 @@ public class LostBuilder {
         this.kateStart = new byte[2];
         this.magicalCells = new byte[2 * numMagicalCells];
         this.exit = new byte[2];
+        this.kateVertices = 0;
     }
 
     public Lost build() {
         //TODO
-        return new Lost(kateGraph, johnGraph,kateStart,johnStart,exit);
+        return new Lost(kateGraph, johnGraph, kateStart, johnStart, exit, (short) (kateVertices - 1));
     }
 
     public void processCell(byte i, byte j) {
         byte cell = grid[i][j];
+        boolean outgoingEdge = true;
         switch (cell) {
             case X:
                 exit[0] = i;
                 exit[1] = j;
-                //can optimise
+                outgoingEdge = false;
             case G:
                 //john
                 for (Directions dir : Directions.values()) {
                     byte i1 = (byte) (i + dir.vertical);
                     byte j1 = (byte) (j + dir.horizontal);
                     if (inBounds(i1, j1) && johnCanMoveTo(grid[i1][j1])) {
-                        johnGraph.add(new Edge(i, j, i1, j1, weightFrom(cell)));
-                        johnGraph.add(new Edge(i1, j1, i, j, weightFrom(grid[i1][j1])));
+                        if (outgoingEdge) {
+                            johnGraph.add(new Edge(i, j, i1, j1, weightFrom(cell)));
+                        }
+                        if (grid[i1][j1] != X) {
+                            johnGraph.add(new Edge(i1, j1, i, j, weightFrom(grid[i1][j1])));
+                        }
                     }
                 }
             case W:
@@ -68,16 +75,22 @@ public class LostBuilder {
                     byte i1 = (byte) (i + dir.vertical);
                     byte j1 = (byte) (j + dir.horizontal);
                     if (inBounds(i1, j1) && kateCanMoveTo(grid[i1][j1])) {
-                        List<WeightedSuccessor> origin = kateGraph[i][j];
-                        if (origin == null) {
-                            kateGraph[i][j] = origin = new LinkedList<>();
+                        if (outgoingEdge) {
+                            List<WeightedSuccessor> origin = kateGraph[i][j];
+                            if (origin == null) {
+                                kateVertices++;
+                                kateGraph[i][j] = origin = new LinkedList<>();
+                            }
+                            origin.add(new WeightedSuccessor(i1, j1, weightFrom(cell)));
                         }
-                        origin.add(new WeightedSuccessor(i1, j1, weightFrom(cell)));
                         List<WeightedSuccessor> destiny = kateGraph[i1][j1];
                         if (destiny == null) {
+                            kateVertices++;
                             kateGraph[i1][j1] = destiny = new LinkedList<>();
                         }
-                        destiny.add(new WeightedSuccessor(i, j, weightFrom(grid[i1][j1])));
+                        if (grid[i1][j1] != X) {
+                            destiny.add(new WeightedSuccessor(i, j, weightFrom(grid[i1][j1])));
+                        }
                     }
                 }
                 break;
