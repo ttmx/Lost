@@ -43,6 +43,9 @@ public class Lost {
         length[kateStart[0]][kateStart[1]] = 0;
         do {
             WeightedSuccessor node = connected.poll();
+            if (node.i == exit[0] && node.j == exit[1]) {
+                break;
+            }
             selected[node.i][node.j] = true;
             if (kateGraph[node.i][node.j] != null) {
                 for (WeightedSuccessor v : kateGraph[node.i][node.j]) {
