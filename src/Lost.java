@@ -8,66 +8,20 @@ public class Lost {
     private final byte[] kateStart;
     private final byte[] exit;
     private final short kateVertices;
+    private final short johnVertices;
 
-    public Lost(List<WeightedSuccessor>[][] kateGraph, List<Edge> johnGraph, byte[] kateStart, byte[] johnStart, byte[] exit, short kateVertices) {
+    public Lost(List<WeightedSuccessor>[][] kateGraph, List<Edge> johnGraph, byte[] kateStart, byte[] johnStart, byte[] exit, short kateVertices, short johnVertices) {
         this.kateGraph = kateGraph;
         this.johnGraph = johnGraph;
         this.johnStart = johnStart;
         this.kateStart = kateStart;
         this.exit = exit;
         this.kateVertices = kateVertices;
+        this.johnVertices = johnVertices;
     }
 
     public String result() {
         return calcJohn() + "\n" + perilousLocations2();
-    }
-
-    public String perilousLocations3() {
-        int[][] length = new int[kateGraph.length][kateGraph[0].length];
-        for (int[] ints : length)
-            Arrays.fill(ints, Integer.MAX_VALUE);
-
-        length[kateStart[0]][kateStart[1]] = 0;
-        boolean changes = true;
-        for (int i = 1; i < kateGraph.length * kateGraph[0].length && changes; i++) {
-            changes = updateLengths2(length);
-        }
-//        if (changes && updateLengths(length))
-//            return "Kate Unreachable";
-
-        final int distance = length[exit[0]][exit[1]];
-        return (distance != Integer.MAX_VALUE) ? "Kate " + distance : "Kate Unreachable";
-    }
-
-    private boolean updateLengths2(int[][] len) {
-        boolean changes = false;
-        for (int i = 0; i < kateGraph.length; i++) {
-            List<WeightedSuccessor>[] lists = kateGraph[i];
-            if (lists == null) {
-                continue;
-            }
-            for (int j = 0; j < lists.length; j++) {
-                List<WeightedSuccessor> list = lists[j];
-                if (list == null) {
-                    continue;
-                }
-                for (WeightedSuccessor edge : list) {
-                    int iTail = i;
-                    int jTail = j;
-                    int iHead = edge.i;
-                    int jHead = edge.j;
-                    if (len[iTail][jTail] < Integer.MAX_VALUE) {
-                        int newLen = len[iTail][jTail] + edge.weight;
-                        if (newLen < len[iHead][jHead]) {
-                            len[iHead][jHead] = newLen;
-                            changes = true;
-                        }
-                    }
-                }
-            }
-
-        }
-        return changes;
     }
 
     public String perilousLocations2() {
@@ -78,55 +32,30 @@ public class Lost {
         return (kateLength != Integer.MAX_VALUE) ? "Kate " + kateLength : "Kate Unreachable";
     }
 
-
     private int dijkstra() {
         int[][] length = new int[kateGraph.length][kateGraph[0].length];
         boolean[][] selected = new boolean[kateGraph.length][kateGraph[0].length];
-        int processed = 0;
-        PriorityQueue<WeightedSuccessor> connected = new PriorityQueue<WeightedSuccessor>(kateVertices, Comparator.comparingInt(o -> o.weight));
-
-
+        PriorityQueue<WeightedSuccessor> connected = new PriorityQueue<>(kateVertices, Comparator.comparingInt(o -> o.weight));
         for (int[] ints : length) {
             Arrays.fill(ints, Integer.MAX_VALUE);
         }
-
-        // Add source node to the priority queue
         connected.add(new WeightedSuccessor(kateStart[0], kateStart[1], (byte) 0));
-
-        // Distance to the source is 0
         length[kateStart[0]][kateStart[1]] = 0;
         do {
-
-            // remove the minimum distance node
-            // from the priority queue
             WeightedSuccessor node = connected.poll();
-
-            // adding the node whose distance is
-            // finalized
-            if (!selected[node.i][node.j]) {
-                selected[node.i][node.j] = true;
-                processed++;
-            }
-
-            // All the neighbors of v
-            if (kateGraph[node.i][node.j] == null) {
-                continue;
-            }
-            for (WeightedSuccessor v : kateGraph[node.i][node.j]) {
-                // If current node hasn't already been processed
-                if (!selected[v.i][v.j]) {
-                    int newLength = length[node.i][node.j] + v.weight;
-
-                    // If new distance is cheaper in cost
-                    if (newLength < length[v.i][v.j]) {
-                        length[v.i][v.j] = newLength;
-                        boolean nodeIsInQueue = length[v.i][v.j] < Integer.MAX_VALUE;
-                        if (nodeIsInQueue) {
-                            connected.remove(new WeightedSuccessor(v.i, v.j, 0));
+            selected[node.i][node.j] = true;
+            if (kateGraph[node.i][node.j] != null) {
+                for (WeightedSuccessor v : kateGraph[node.i][node.j]) {
+                    if (!selected[v.i][v.j]) {
+                        int newLength = length[node.i][node.j] + v.weight;
+                        if (newLength < length[v.i][v.j]) {
+                            length[v.i][v.j] = newLength;
+                            boolean nodeIsInQueue = length[v.i][v.j] < Integer.MAX_VALUE;
+                            if (nodeIsInQueue) {
+                                connected.remove(new WeightedSuccessor(v.i, v.j, 0));
+                            }
+                            connected.add(new WeightedSuccessor(v.i, v.j, length[v.i][v.j]));
                         }
-                        // Add the current node to the queue
-                        connected.add(new WeightedSuccessor(v.i, v.j, length[v.i][v.j]));
-
                     }
                 }
             }
@@ -203,13 +132,13 @@ public class Lost {
 
         length[johnStart[0]][johnStart[1]] = 0;
         boolean changes = true;
-        for (int i = 1; i < kateGraph.length * kateGraph[0].length && changes; i++) {
+        for (int i = 1; i < johnVertices && changes; i++) {
             changes = updateLengths(length);
         }
         if (changes && updateLengths(length))
             return "John Lost in Time";
 
-        final int distance = length[exit[0]][exit[1]];
+        int distance = length[exit[0]][exit[1]];
         return (distance == Integer.MAX_VALUE) ? "John Unreachable" : "John " + distance;
     }
 
@@ -230,6 +159,5 @@ public class Lost {
         }
         return changes;
     }
-
 
 }

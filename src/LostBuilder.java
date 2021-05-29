@@ -28,7 +28,7 @@ public class LostBuilder {
     private final byte[] kateStart;
     private final byte[] magicalCells;
     private final byte[] exit;
-    private short kateVertices;
+    private short kateVertices, johnVertices;
 
     @SuppressWarnings("unchecked")
     public LostBuilder(byte[][] grid, byte rows, byte columns, byte numMagicalCells) {
@@ -40,11 +40,13 @@ public class LostBuilder {
         this.magicalCells = new byte[2 * numMagicalCells];
         this.exit = new byte[2];
         this.kateVertices = 0;
+        this.johnVertices = 0;
     }
 
     public Lost build() {
-        //TODO
-        return new Lost(kateGraph, johnGraph, kateStart, johnStart, exit, (short) (kateVertices - 1));
+        // Add the exit (+1) and the potentially not accounted for, but accessible via magical wheels, islands
+        short johnVertices = (short) (this.johnVertices + 1 + magicalCells.length / 2);
+        return new Lost(kateGraph, johnGraph, kateStart, johnStart, exit, kateVertices, johnVertices);
     }
 
     public void processCell(byte i, byte j) {
@@ -57,17 +59,22 @@ public class LostBuilder {
                 outgoingEdge = false;
             case G:
                 //john
+                boolean added = false;
                 for (Directions dir : Directions.values()) {
                     byte i1 = (byte) (i + dir.vertical);
                     byte j1 = (byte) (j + dir.horizontal);
                     if (inBounds(i1, j1) && johnCanMoveTo(grid[i1][j1])) {
                         if (outgoingEdge) {
                             johnGraph.add(new Edge(i, j, i1, j1, weightFrom(cell)));
+                            added = true;
                         }
                         if (grid[i1][j1] != X) {
                             johnGraph.add(new Edge(i1, j1, i, j, weightFrom(grid[i1][j1])));
                         }
                     }
+                }
+                if (added) {
+                    johnVertices++;
                 }
             case W:
                 //kate
